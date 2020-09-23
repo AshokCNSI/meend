@@ -1,0 +1,69 @@
+	
+<ion-header [translucent]="true" style="z-index : 0;">
+  <ion-toolbar >
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title *ngIf="!locationService.getCurrentLocation()">
+		<ion-skeleton-text animated style="width: 50%"></ion-skeleton-text>
+	</ion-title>
+	<ion-title *ngIf="locationService.getCurrentLocation()" (click)="openMapSelection()">
+		{{locationService.getCurrentLocation() == "" ? 'No address found' : locationService.getCurrentLocation()}}
+		<p class="subtitle">Click to change address</p>
+	</ion-title>
+	
+  </ion-toolbar>
+  	<ion-searchbar *ngIf="authService.getUserType() != 'D'" animated showCancelButton="always" debounce="500" (ionCancel)="onCancel($event)" cancelButtonText="Custom Cancel"
+		(ionInput)="filterProductList($event)" (ionFocus)="hideContent()"  [value]="searchVal" autofocus="true"></ion-searchbar>
+
+</ion-header>
+
+<ion-content>
+<ion-card-header>
+	<ion-card-title class="heading">Your current pickups</ion-card-title>
+</ion-card-header>
+<ng-container>
+<ng-container *ngIf="productList.length == 0 && norecordstatus">
+<div class="no-items">
+	<ion-card-subtitle>No Pickups Available</ion-card-subtitle>
+	<ion-button color="light" (click)="fetchPickups()">Retry</ion-button>
+</div>
+</ng-container>
+
+	<ng-container *ngIf="productList.length > 0">
+	<ion-item *ngFor="let p of productList;" [routerLink]="['/orderdetails/'+p.index]">
+	  <ion-card-header>
+		  <ion-card-title>Order reference - {{p.orderref}}</ion-card-title>
+		  <ion-card-subtitle>{{p.modifieddate |  date:'MM/dd/yyyy h:mm:ss a'}}</ion-card-subtitle>
+		  <ion-card-subtitle>&#x20b9;{{p.totalamount}}</ion-card-subtitle>
+		  <ion-card-content style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
+			  Pickup available within {{p.distance}} km
+		  </ion-card-content>
+	  </ion-card-header>
+	</ion-item>
+	</ng-container>
+</ng-container>
+
+<div *ngIf="productList.length == 0 && !norecordstatus">
+	<ion-row *ngFor="let i of Arr(skeletoncount).fill(1)">
+		<ion-col>
+			<ion-card>
+				<ion-skeleton-text animated></ion-skeleton-text>
+				<ion-card-header>
+				  <ion-card-subtitle><ion-skeleton-text animated style="width: 50%"></ion-skeleton-text></ion-card-subtitle>
+				  <ion-card-title><ion-skeleton-text animated style="width: 50%"></ion-skeleton-text></ion-card-title>
+				  
+				</ion-card-header>
+				<italic style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
+				  <ion-skeleton-text animated style="width: 50%"></ion-skeleton-text>
+				</italic>
+				
+				<ion-card-header>
+				  <ion-card-subtitle><ion-skeleton-text animated style="width: 50%"></ion-skeleton-text></ion-card-subtitle>
+				  <ion-card-subtitle><ion-skeleton-text animated style="width: 50%"></ion-skeleton-text></ion-card-subtitle>
+				</ion-card-header>
+			</ion-card>
+		</ion-col>
+	</ion-row>
+</div>
+</ion-content>

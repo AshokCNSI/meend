@@ -1,0 +1,30 @@
+<ion-header style="z-index : 0;">
+  <ion-toolbar style="--border-style: none">
+  <ion-buttons style="font-size: 25px;margin: 10px;" slot="start" [routerLink]="['/home']">
+		<ion-icon name="arrow-back-outline"></ion-icon>
+	</ion-buttons>
+    <ion-title>My Assignments</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+<ng-container *ngFor="let p of cartList;">
+	<ion-item>
+	  <ion-thumbnail slot="start">
+		<ng-container *ngFor="let i of statusList;">
+			<ion-icon *ngIf="p.currentstatus == i.code" name="{{i.icon}}" size="large"></ion-icon>
+			<ion-card-subtitle *ngIf="p.currentstatus == i.code" style="color:{{i.color}}">{{i.name}}</ion-card-subtitle>
+		</ng-container>
+	  </ion-thumbnail>
+	  <ion-card-header>
+		  <ion-card-title [routerLink]="['/orderdetails/'+p.index]">Order reference - {{p.orderref}}</ion-card-title>
+		  <ion-card-subtitle>{{p.modifieddate |  date:'MM/dd/yyyy h:mm:ss a'}}</ion-card-subtitle>
+		  <ion-card-subtitle>&#x20b9;{{p.totalamount}}</ion-card-subtitle>
+	  </ion-card-header>
+	</ion-item>
+	
+</ng-container>
+<ng-container *ngIf="cartList.length == 0">
+	<p class="no-items">No Assignments available</p>
+</ng-container>
+</ion-content>
