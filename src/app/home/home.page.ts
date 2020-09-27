@@ -68,28 +68,8 @@ export class HomePage implements OnInit {
   }
 
   ngOnInit() { 
-	this.authService.userDetails().subscribe(res => { 
-		if (res !== null) {
-			this.authService.setUserName(res.email);
-			this.authService.setUserID(res.uid);
-			this.authService.setEmailID(res.email);
-			this.authService.setIsUserLoggedIn(true);
-			firebase.database().ref('/profile/'+res.uid).once('value').then((snapshot) => {
-				if(snapshot != null) {
-					this.authService.setUserType(snapshot.child('usertype').val());  
-					this.authService.setUserName(snapshot.child('firstname').val()+" "+snapshot.child('lastname').val());
-					this.locationService.setCurrentLocationFn();
-					this.fetchPickups();
-				}
-			})
-		} else {
-			this.authService.setIsUserLoggedIn(false);
-			this.navController.navigateRoot('/login');
-		}
-	  }, err => {
-		  console.log('err', err);
-	 })
-}
+    this.loadData();
+  }
   
   ionViewWillEnter() {
 	this.menuCtrl.enable(true);
@@ -138,6 +118,16 @@ export class HomePage implements OnInit {
 		return await modal.present();
   } 
   
+  loadData() {
+	  setTimeout(() => {
+		if(this.authService.getUserID()) {
+			this.fetchPickups();
+		} else {
+			this.loadData();
+		}
+	  }, 2000);
+  }
+  
   fetchPickups() {
 	  this.norecordstatus = false;
 	  firebase.database().ref('/orders/').orderByChild('currentstatus').equalTo('WFP').once('value').then((snapshot) => { 
@@ -174,4 +164,5 @@ export class HomePage implements OnInit {
 		}
 	  }, 10000);
   }
+ 
 }

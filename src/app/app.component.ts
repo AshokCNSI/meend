@@ -85,7 +85,27 @@ export class AppComponent implements OnInit {
 	
 	// stop connect watch
 	//connectSubscription.unsubscribe();
-	
+	let options: NativeGeocoderOptions = {
+		useLocale: true,
+		maxResults: 5
+	};
+	let watch = this.geolocation.watchPosition();
+	watch.subscribe((data) => {
+	 // data can be a set of coordinates, or an error (if an error occurred).
+	 // data.coords.latitude
+	 // data.coords.longitude
+	 this.locationService.setLatitude(data.coords.latitude.toString());
+	 this.locationService.setLongitude(data.coords.longitude.toString());
+	 this.nativeGeocoder.reverseGeocode(data.coords.latitude, data.coords.longitude, options)
+		.then((result: NativeGeocoderResult[]) => {
+			this.locationService.setCurrentLocation(this.generateAddress(result[0]));
+		})
+		.catch((error: any) => {
+			//this.navController.navigateRoot('/locationfinder');
+		});
+	 
+	});
+
 	router.events.subscribe( (event: Event) => {
 		if (event instanceof NavigationStart) {
 			
@@ -120,20 +140,24 @@ export class AppComponent implements OnInit {
 		  this.navController.navigateRoot('/locationfinder');
 		} else {
 			this.authService.userDetails().subscribe(res => { 
-				if (res !== null) {
-					firebase.database().ref('/profile/'+res.uid).once('value').then((snapshot) => {
-						if(snapshot != null) {
-							if(!snapshot.toJSON()) {
-								this.navController.navigateRoot('/customerdetails');
-							}
-						}
-					})
-				} else {
-					this.navController.navigateRoot('/mobilelogin');
-				}
-			  }, err => {
-				  console.log('err', err);
-			 })
+			if (res !== null) {
+				this.authService.setUserName(res.email);
+				this.authService.setUserID(res.uid);
+				this.authService.setEmailID(res.email);
+				this.authService.setIsUserLoggedIn(true);
+				firebase.database().ref('/profile/'+res.uid).once('value').then((snapshot) => {
+					if(snapshot != null) {
+						this.authService.setUserType(snapshot.child('usertype').val());  
+						this.authService.setUserName(snapshot.child('firstname').val()+" "+snapshot.child('lastname').val());
+					}
+				})
+			} else {
+				this.authService.setIsUserLoggedIn(false);
+				this.navController.navigateRoot('/login');
+			}
+		  }, err => {
+			  console.log('err', err);
+		 })
 		}
 	  }).catch(e => console.log(e));
 	  
@@ -184,4 +208,18 @@ export class AppComponent implements OnInit {
 	  this.menuCtrl.toggle();
 	  this.navController.navigateRoot('/aboutme');
 	}
+	
+	generateAddress(addressObj) {
+		let obj = [];
+		let address = "";
+		for (let key in addressObj) {
+		  obj.push(addressObj[key]);
+		}
+		obj.reverse();
+		for (let val in obj) {
+		  if (obj[val].length)
+			address += obj[val] + ', ';
+		}
+		return address.slice(0, -2);
+	  }
 }

@@ -7,15 +7,12 @@
     <ion-title *ngIf="!locationService.getCurrentLocation()">
 		<ion-skeleton-text animated style="width: 50%"></ion-skeleton-text>
 	</ion-title>
-	<ion-title *ngIf="locationService.getCurrentLocation()" (click)="openMapSelection()">
+	<ion-title *ngIf="locationService.getCurrentLocation()">
 		{{locationService.getCurrentLocation() == "" ? 'No address found' : locationService.getCurrentLocation()}}
-		<p class="subtitle">Click to change address</p>
 	</ion-title>
 	
   </ion-toolbar>
-  	<ion-searchbar *ngIf="authService.getUserType() != 'D'" animated showCancelButton="always" debounce="500" (ionCancel)="onCancel($event)" cancelButtonText="Custom Cancel"
-		(ionInput)="filterProductList($event)" (ionFocus)="hideContent()"  [value]="searchVal" autofocus="true"></ion-searchbar>
-
+  	
 </ion-header>
 
 <ion-content>
